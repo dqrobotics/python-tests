@@ -20,7 +20,6 @@ Contributors:
 """
 
 import unittest
-import scipy.io
 from dqrobotics import*
 from dqrobotics.robot_modeling import DQ_SerialManipulatorDH
 from dqrobotics.robot_modeling import DQ_SerialManipulatorMDH
