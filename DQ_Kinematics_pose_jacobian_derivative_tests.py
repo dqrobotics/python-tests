@@ -24,9 +24,6 @@ from dqrobotics.robot_modeling import DQ_SerialManipulatorDH
 from dqrobotics.robot_modeling import DQ_SerialManipulatorMDH
 from dqrobotics.robot_modeling import DQ_HolonomicBase
 from dqrobotics.robot_modeling import DQ_DifferentialDriveRobot
-from dqrobotics.robot_modeling import DQ_SerialManipulatorDenso
-from dqrobotics.robot_modeling import DQ_SerialWholeBody
-from dqrobotics.robot_modeling import DQ_WholeBody
 from dqrobotics.robots import FrankaEmikaPandaRobot
 from dqrobotics.robots import KukaLw4Robot
 import numpy as np
