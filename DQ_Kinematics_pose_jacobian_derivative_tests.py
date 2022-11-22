@@ -26,6 +26,9 @@ from dqrobotics.robot_modeling import DQ_HolonomicBase
 from dqrobotics.robot_modeling import DQ_DifferentialDriveRobot
 from dqrobotics.robots import FrankaEmikaPandaRobot
 from dqrobotics.robots import KukaLw4Robot
+from dqrobotics.robots import KukaYoubotRobot
+from dqrobotics.robot_modeling import DQ_SerialManipulatorDenso
+from dqrobotics.robot_modeling import DQ_WholeBody
 import numpy as np
 from math import pi, sin , cos
 
@@ -103,7 +106,8 @@ robot_type = np.array([0,0,1,0,0,0])
 robot_DH_matrix = np.array([robot_DH_theta, robot_DH_d, robot_DH_a, robot_DH_alpha, robot_type])
 robotDH = DQ_SerialManipulatorDH(robot_DH_matrix)
 
-
+#######################################################################################
+#######################################################################################
 # Robot Declaration using the Modified DH Convention
 # (See Table 2.1 from Foundations of Robotics, Tsuneo Yoshikawa)
 robot_MDH_theta = np.array([0, 0, 0, 0, 0, 0])
@@ -114,13 +118,44 @@ robot_MDH_matrix = np.array([robot_MDH_theta, robot_MDH_d, robot_MDH_a, robot_MD
 robotMDH = DQ_SerialManipulatorMDH(robot_MDH_matrix)
 robotMDH.set_effector(1 + DQ.E * 0.5 * DQ.k * d6)
 
+#######################################################################################
+#######################################################################################
+## Denso Robot Manipulator definition
+#
+d2 = 0.4
+d3 = 0.1
+d6 = 0.3
+robot_Denso_a = np.array([0, 0, 0, 0, 0, 0])
+robot_Denso_b = np.array([0,d2,d3,0,0,d6])
+robot_Denso_d = np.array([0, 0, 0, 0 ,0 ,0])
+robot_Denso_alpha = np.array([-pi/2, pi/2, 0,-pi/2,pi/2,0])
+robot_Denso_beta = np.array([-pi/2, pi/2, 0,-pi/2,pi/2,0])
+robot_Denso_gamma = np.array([-pi/2, pi/2, 0,-pi/2,pi/2,0])
+
+robot_Denso_matrix = np.array([robot_Denso_a, robot_Denso_b, robot_Denso_d, robot_Denso_alpha,
+                            robot_Denso_beta, robot_Denso_gamma])
+
+robotDenso= DQ_SerialManipulatorDenso(robot_Denso_matrix)
+
+#######################################################################################
+#######################################################################################
+robot1 = KukaLw4Robot.kinematics()
+robot2 = KukaLw4Robot.kinematics()
+whole_body_robot = DQ_WholeBody(robot1)
+whole_body_robot.add(robot2)
+
+
+
+#######################################################################################
+#######################################################################################
+
 kuka = KukaLw4Robot.kinematics()
 franka = FrankaEmikaPandaRobot.kinematics()
 hol_base = DQ_HolonomicBase()
 diff_base = DQ_DifferentialDriveRobot(0.3, 0.01)
 stanfordDHRobot = robotDH
 stanfordMDHRobot = robotMDH
-
+youbot = KukaYoubotRobot.kinematics()
 
 ## DQTestCase class.
 #  This class performs the unit tests of the DQ_Kinematics::pose_jacobian_derivative class.
@@ -130,6 +165,9 @@ class DQTestCase(unittest.TestCase):
     global franka
     global StanfordDHRobot
     global StanfordMDHRobot
+    global robotDenso
+    global youbot
+    global whole_body_robot
 
     ## test_holonomic_base_pose_jacobian_derivative
     # Performs the unit tests of the DQ_HolonomicBase.pose_jacobian_derivative() method
@@ -164,6 +202,31 @@ class DQTestCase(unittest.TestCase):
                                                    "Error in DQ_SerialManipulator.pose_jacobian_derivative()")
 
 
+    ##########################################################################################################
+    ##########################################################################################################
+    ####     Testing classes where the pose jacobian derivative method is not available for the user
+
+    ## test_serial_manipulator_denso_pose_jacobian_derivative
+    # Performs the unit tests of the DQ_SerialManipulatorDenso.pose_jacobian_derivative() method
+    def test_serial_manipulator_denso_pose_jacobian_derivative(self):
+        njoints = robotDenso.get_dim_configuration_space()
+        with self.assertRaises(Exception):
+            J_dot = robotDenso.pose_jacobian_derivative(np.zeros(njoints), np.zeros(njoints))
+
+
+    ## test_serial_whole_body_pose_jacobian_derivative
+    # Performs the unit tests of the DQ_SerialWholeBody.pose_jacobian_derivative() method
+    def test_serial_whole_body_pose_jacobian_derivative(self):
+        njoints = youbot.get_dim_configuration_space()
+        with self.assertRaises(Exception):
+          J_dot =youbot.pose_jacobian_derivative(np.zeros(njoints), np.zeros(njoints))
+
+    ## test_whole_body_pose_jacobian_derivative
+    # Performs the unit tests of the DQ_WholeBody.pose_jacobian_derivative() method
+    def test_whole_body_pose_jacobian_derivative(self):
+        njoints = whole_body_robot.get_dim_configuration_space()
+        with self.assertRaises(Exception):
+          J_dot = whole_body_robot.pose_jacobian_derivative(np.zeros(njoints), np.zeros(njoints))
 
 if __name__ == '__main__':
     unittest.main()
