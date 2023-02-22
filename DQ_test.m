@@ -27,6 +27,7 @@ result_of_log = zeros(8, NUMBER_OF_RANDOM);
 result_of_exp = zeros(8, NUMBER_OF_RANDOM);
 result_of_rotation_axis = zeros(8, NUMBER_OF_RANDOM);
 result_of_rotation_angle = zeros(8, NUMBER_OF_RANDOM);
+result_of_Q8 = zeros(8,6, NUMBER_OF_RANDOM);
 
 %% Loop
 for i=1:NUMBER_OF_RANDOM
@@ -50,7 +51,7 @@ for i=1:NUMBER_OF_RANDOM
     result_of_exp(:,i) = vec8(exp(get_pure(DQ(random_dq_a(:,i)))));
     result_of_rotation_axis(:,i) = vec8(DQ(rotation_axis(normalize(DQ(random_dq_a(:,i))))));
     result_of_rotation_angle(:,i) = vec8(DQ(rotation_angle(normalize(DQ(random_dq_a(:,i))))));
-    
+    result_of_Q8(:,:,i) = Q8(normalize(DQ(random_dq_a(:,i))));
 end
 
 save DQ_test.mat
