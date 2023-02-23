@@ -24,8 +24,27 @@ import scipy.io
 import numpy
 from dqrobotics import *
 from DQ_test_facilities import get_list_of_dq_from_mat
+from DQ_test_facilities import get_list_of_matrices_from_mat
 
-mat = scipy.io.loadmat('DQ_test.mat')
+"""
+Note from Juan Jose Quiroz Omana:
+
+I generated new data (DQ_test.mat) using DQ_test.m to include Q8 operations. 
+The legacy data (October 10, 2019) is in DQ_test_october_10_2019.mat.
+However, The test_ad fails with 'DQ_test.mat' with the following assertion:
+
+AssertionError: 
+Arrays are not almost equal to 12 decimals
+Error in Ad
+Mismatched elements: 1 / 8 (12.5%)
+Max absolute difference: 1.8189894e-12
+Max relative difference: 5.05591348e-16
+
+This is the reason to use 'DQ_test_october_10_2019.mat' for all tests except 
+test_of_Q8, which uses 'DQ_test.mat'.
+"""
+mat = scipy.io.loadmat('DQ_test_october_10_2019.mat')
+mat_feb_22_2023 = scipy.io.loadmat('DQ_test.mat')
 
 dq_a_list = get_list_of_dq_from_mat('random_dq_a', mat)
 dq_b_list = get_list_of_dq_from_mat('random_dq_b', mat)
@@ -155,6 +174,11 @@ class DQTestCase(unittest.TestCase):
         for a, c in zip(dq_a_list, result_of_rotation_angle):
             self.assertEqual(DQ([rotation_angle(normalize(a))]), c, "Error in rotation_angle")
 
+    def test_of_Q8(self):
+        result_of_Q8 = get_list_of_matrices_from_mat('result_of_Q8', mat_feb_22_2023)
+        dq_a_list_Q8 = get_list_of_dq_from_mat('random_dq_a', mat_feb_22_2023)
+        for a, c in zip(dq_a_list_Q8, result_of_Q8):
+            numpy.testing.assert_almost_equal(Q8(normalize(a)), c, 12, "Error in Q8")
 
 if __name__ == '__main__':
     unittest.main()
