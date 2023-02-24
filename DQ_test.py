@@ -81,7 +81,7 @@ class DQTestCase(unittest.TestCase):
                          DQ(1, 0, 0, 0, 0, 0, 0, 0),
                          "Incorrect 1 element constructor")
 
-    def test_contructor_invalid(self):
+    def test_constructor_invalid(self):
         # Two
         with self.assertRaises(ValueError):
             DQ([1, 2])
@@ -126,7 +126,7 @@ class DQTestCase(unittest.TestCase):
     def test_adsharp(self):
         result_of_Adsharp = get_list_of_dq_from_mat('result_of_Adsharp', mat)
         for a, b, c in zip(dq_a_list, dq_b_list, result_of_Adsharp):
-            numpy.testing.assert_almost_equal(vec8(Adsharp(a, b)), vec8(c), 12, "Error in Ad")
+            numpy.testing.assert_almost_equal(vec8(Adsharp(a, b)), vec8(c), 12, "Error in Adsharp")
 
     # Unary operators
     def test_conj(self):
