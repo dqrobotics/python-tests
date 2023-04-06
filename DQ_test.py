@@ -179,6 +179,7 @@ class DQTestCase(unittest.TestCase):
         dq_a_list_Q4 = get_list_of_dq_from_mat('random_dq_a', mat_feb_22_2023)
         for a, c in zip(dq_a_list_Q4, result_of_Q4):
             numpy.testing.assert_almost_equal(Q4(normalize(P(a))), c, 12, "Error in Q8")
+
     def test_of_Q8(self):
         result_of_Q8 = get_list_of_matrices_from_mat('result_of_Q8', mat_feb_22_2023)
         dq_a_list_Q8 = get_list_of_dq_from_mat('random_dq_a', mat_feb_22_2023)
