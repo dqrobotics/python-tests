@@ -40,10 +40,10 @@ dq_a_list = get_list_of_dq_from_mat('random_dq_a', mat)
 dq_b_list = get_list_of_dq_from_mat('random_dq_b', mat)
 
 # Threshold related to DQ_threshold
-threshold = -(math.log10(DQ_threshold)/math.log10(10))
+threshold = -math.log10(DQ_threshold)
 
 # Relaxed threshold used in some specific tests
-relaxed_threshold = 0.1*threshold
+relaxed_threshold = threshold-1
 
 class DQTestCase(unittest.TestCase):
     global mat
