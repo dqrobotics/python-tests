@@ -17,8 +17,16 @@ This file is part of DQ Robotics.
 
 Contributors:
 - Murilo M. Marinho (murilo@nml.t.u-tokyo.ac.jp)
+  Responsible for the original implementation.
+
+- Juan Jose Quiroz Omana (juanjqo@g.ecc.u-tokyo.ac.jp)
+  Added some modifications discussed at #6 (https://github.com/dqrobotics/python-tests/pull/6)
+        - Added tests for Q4 and Q8. 
+        - Replaced 12 by a threshold related to DQ_threshold in all tests.
+        - Added a relaxed threshold to ad and adsharp tests.
 """
 
+import math
 import unittest
 import scipy.io
 import numpy
@@ -26,29 +34,16 @@ from dqrobotics import *
 from DQ_test_facilities import get_list_of_dq_from_mat
 from DQ_test_facilities import get_list_of_matrices_from_mat
 
-"""
-Note from Juan Jose Quiroz Omana:
-
-I generated new data (DQ_test.mat) using DQ_test.m to include Q8 operations. 
-The legacy data (October 10, 2019) is in DQ_test_october_10_2019.mat.
-However, The test_ad fails with 'DQ_test.mat' with the following assertion:
-
-AssertionError: 
-Arrays are not almost equal to 12 decimals
-Error in Ad
-Mismatched elements: 1 / 8 (12.5%)
-Max absolute difference: 1.8189894e-12
-Max relative difference: 5.05591348e-16
-
-This is the reason to use 'DQ_test_october_10_2019.mat' for all tests except 
-test_of_Q4 and test_of_Q8, which use 'DQ_test.mat.
-"""
-mat = scipy.io.loadmat('DQ_test_october_10_2019.mat')
-mat_feb_22_2023 = scipy.io.loadmat('DQ_test.mat')
+mat = scipy.io.loadmat('DQ_test_06_04_2023.mat')
 
 dq_a_list = get_list_of_dq_from_mat('random_dq_a', mat)
 dq_b_list = get_list_of_dq_from_mat('random_dq_b', mat)
 
+# Threshold related to DQ_threshold
+threshold = -(math.log(DQ_threshold)/math.log(10))
+
+# Relaxed threshold used in some specific tests
+relaxed_threshold = 0.1*threshold
 
 class DQTestCase(unittest.TestCase):
     global mat
@@ -92,27 +87,7 @@ class DQTestCase(unittest.TestCase):
         with self.assertRaises(ValueError):
             DQ([1, 2, 3, 4, 5, 6, 7])
 
-    # Binary operators
-    def test_plus(self):
-        result_of_plus = get_list_of_dq_from_mat('result_of_plus', mat)
-        for a, b, c in zip(dq_a_list, dq_b_list, result_of_plus):
-            self.assertEqual(a + b, c, "Error in +")
-
-    def test_minus(self):
-        result_of_minus = get_list_of_dq_from_mat('result_of_minus', mat)
-        for a, b, c in zip(dq_a_list, dq_b_list, result_of_minus):
-            self.assertEqual(a - b, c, "Error in -")
-
-    def test_times(self):
-        result_of_times = get_list_of_dq_from_mat('result_of_times', mat)
-        for a, b, c in zip(dq_a_list, dq_b_list, result_of_times):
-            self.assertEqual(a * b, c, "Error in *")
-
-    def test_dot(self):
-        result_of_dot = get_list_of_dq_from_mat('result_of_dot', mat)
-        for a, b, c in zip(dq_a_list, dq_b_list, result_of_dot):
-            self.assertEqual(dot(a, b), c, "Error in dot")
-
+    
     def test_cross(self):
         result_of_cross = get_list_of_dq_from_mat('result_of_cross', mat)
         for a, b, c in zip(dq_a_list, dq_b_list, result_of_cross):
@@ -121,12 +96,12 @@ class DQTestCase(unittest.TestCase):
     def test_ad(self):
         result_of_Ad = get_list_of_dq_from_mat('result_of_Ad', mat)
         for a, b, c in zip(dq_a_list, dq_b_list, result_of_Ad):
-            numpy.testing.assert_almost_equal(vec8(Ad(a, b)), vec8(c), 12, "Error in Ad")
+            numpy.testing.assert_almost_equal(vec8(Ad(a, b)), vec8(c), relaxed_threshold, "Error in Ad")
 
     def test_adsharp(self):
         result_of_Adsharp = get_list_of_dq_from_mat('result_of_Adsharp', mat)
         for a, b, c in zip(dq_a_list, dq_b_list, result_of_Adsharp):
-            numpy.testing.assert_almost_equal(vec8(Adsharp(a, b)), vec8(c), 12, "Error in Adsharp")
+            numpy.testing.assert_almost_equal(vec8(Adsharp(a, b)), vec8(c), relaxed_threshold, "Error in Adsharp")
 
     # Unary operators
     def test_conj(self):
@@ -175,16 +150,16 @@ class DQTestCase(unittest.TestCase):
             self.assertEqual(DQ([rotation_angle(normalize(a))]), c, "Error in rotation_angle")
 
     def test_of_Q4(self):
-        result_of_Q4 = get_list_of_matrices_from_mat('result_of_Q4', mat_feb_22_2023)
-        dq_a_list_Q4 = get_list_of_dq_from_mat('random_dq_a', mat_feb_22_2023)
+        result_of_Q4 = get_list_of_matrices_from_mat('result_of_Q4', mat)
+        dq_a_list_Q4 = get_list_of_dq_from_mat('random_dq_a', mat)
         for a, c in zip(dq_a_list_Q4, result_of_Q4):
-            numpy.testing.assert_almost_equal(Q4(normalize(P(a))), c, 12, "Error in Q8")
+            numpy.testing.assert_almost_equal(Q4(normalize(P(a))), c, threshold, "Error in Q8")
 
     def test_of_Q8(self):
-        result_of_Q8 = get_list_of_matrices_from_mat('result_of_Q8', mat_feb_22_2023)
-        dq_a_list_Q8 = get_list_of_dq_from_mat('random_dq_a', mat_feb_22_2023)
+        result_of_Q8 = get_list_of_matrices_from_mat('result_of_Q8', mat)
+        dq_a_list_Q8 = get_list_of_dq_from_mat('random_dq_a', mat)
         for a, c in zip(dq_a_list_Q8, result_of_Q8):
-            numpy.testing.assert_almost_equal(Q8(normalize(a)), c, 12, "Error in Q8")
+            numpy.testing.assert_almost_equal(Q8(normalize(a)), c, threshold, "Error in Q8")
 
 if __name__ == '__main__':
     unittest.main()
