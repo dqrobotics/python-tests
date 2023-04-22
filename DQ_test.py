@@ -40,7 +40,7 @@ dq_a_list = get_list_of_dq_from_mat('random_dq_a', mat)
 dq_b_list = get_list_of_dq_from_mat('random_dq_b', mat)
 
 # Threshold related to DQ_threshold
-threshold = -(math.log(DQ_threshold)/math.log(10))
+threshold = -(math.log10(DQ_threshold)/math.log10(10))
 
 # Relaxed threshold used in some specific tests
 relaxed_threshold = 0.1*threshold
